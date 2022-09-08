@@ -47,7 +47,7 @@ class UserControllerTest {
 
     @Test
     void shouldCreateUser() {
-        assertEquals(user, userController.getUserList().get(1));
+        assertEquals(user, userController.getUserList().get(user.getId()));
     }
 
     @Test

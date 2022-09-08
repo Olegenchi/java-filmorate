@@ -48,7 +48,7 @@ class FilmControllerTest {
 
     @Test
     void shouldCreateFilm() {
-        assertEquals(film, filmController.getFilmList().get(1));
+        assertEquals(film, filmController.getFilmList().get(film.getId()));
     }
 
     @Test
