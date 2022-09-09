@@ -19,8 +19,8 @@ import java.util.Map;
 @RequestMapping("/films")
 @Data
 public class FilmController {
-    private Map<Integer, Film> filmList = new HashMap<>();
-    private LocalDate MIN_DATE = LocalDate.of(1895, 12, 28);
+    private static final LocalDate MIN_DATE = LocalDate.of(1895, 12, 28);
+    private final Map<Integer, Film> allFilms = new HashMap<>();
     private int id = 0;
 
     private int generateNextId() {
@@ -29,30 +29,28 @@ public class FilmController {
 
     @GetMapping
     public List<Film> findAllFilms() {
-        log.debug("Текущее количество фильмов: {}", filmList.size());
-        return new ArrayList<>(filmList.values());
+        log.debug("Текущее количество фильмов: {}", allFilms.size());
+        return new ArrayList<>(allFilms.values());
     }
 
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
-        if (filmList.containsKey(film.getId())) {
+        if (allFilms.containsKey(film.getId())) {
             return film;
         }
         if (filmValidation(film)) {
             film.setId(generateNextId());
-            filmList.put(film.getId(), film);
+            allFilms.put(film.getId(), film);
             log.debug("Фильм добавлен: {}", film);
             return film;
-        } else {
-            log.warn("Ошибка при добавлении фильма: {}", film);
-            throw new ValidationException("Дата релиза не может быть раньше 28.12.1895 г.");
         }
+        return film;
     }
 
     @PutMapping
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (filmValidation(film) && filmList.containsKey(film.getId())) {
-            filmList.put(film.getId(), film);
+        if (filmValidation(film) && allFilms.containsKey(film.getId())) {
+            allFilms.put(film.getId(), film);
             log.debug("Фильм обновлен: {}", film);
             return film;
         } else {
@@ -63,6 +61,7 @@ public class FilmController {
 
     public boolean filmValidation(Film film){
         if (film.getReleaseDate().isBefore(MIN_DATE)) {
+            log.warn("Ошибка при добавлении фильма: {}", film);
             throw new ValidationException("Дата релиза не может быть раньше 28.12.1895 г.");
         }
         return true;

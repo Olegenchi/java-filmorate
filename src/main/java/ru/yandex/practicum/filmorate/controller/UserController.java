@@ -17,7 +17,7 @@ import java.util.Map;
 @RequestMapping("/users")
 @Data
 public class UserController {
-    private Map<Integer, User> userList = new HashMap<>();
+    private final Map<Integer, User> allUsers = new HashMap<>();
     private int id = 0;
 
     private int generateNextId() {
@@ -26,13 +26,13 @@ public class UserController {
 
     @GetMapping
     public List<User> findAllUsers() {
-        log.debug("Текущее количество пользователей: {}", userList.size());
-        return new ArrayList<>(userList.values());
+        log.debug("Текущее количество пользователей: {}", allUsers.size());
+        return new ArrayList<>(allUsers.values());
     }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        if (userList.containsKey(user.getId())) {
+        if (allUsers.containsKey(user.getId())) {
             return user;
         }
         if (user.getName() == null || user.getName().isEmpty()) {
@@ -40,7 +40,7 @@ public class UserController {
             log.debug("Пользователь создан. В качестве имени использован login: {}", user);
         }
         user.setId(generateNextId());
-        userList.put(user.getId(), user);
+        allUsers.put(user.getId(), user);
         log.debug("Пользователь добавлен с именем и логином: {}", user);
         return user;
     }
@@ -51,8 +51,8 @@ public class UserController {
             user.setName(user.getLogin());
             log.debug("Пользователь создан. В качестве имени использован login: {}", user);
         }
-        if (userList.containsKey(user.getId())) {
-            userList.put(user.getId(), user);
+        if (allUsers.containsKey(user.getId())) {
+            allUsers.put(user.getId(), user);
             log.debug("Пользователь обновлен: {}", user);
             return user;
         }
