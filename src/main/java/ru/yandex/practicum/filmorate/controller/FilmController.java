@@ -49,7 +49,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@RequestBody Film film) {
+    public Film updateFilm(@Valid @RequestBody Film film) {
         if (filmValidation(film) && filmList.containsKey(film.getId())) {
             filmList.put(film.getId(), film);
             log.debug("Фильм обновлен: {}", film);

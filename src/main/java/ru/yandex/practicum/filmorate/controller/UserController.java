@@ -37,7 +37,7 @@ public class UserController {
         }
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
-            log.debug("Пользователь создан. В качестве имени использовал login: {}", user);
+            log.debug("Пользователь создан. В качестве имени использован login: {}", user);
         }
         user.setId(generateNextId());
         userList.put(user.getId(), user);
@@ -46,7 +46,11 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User user) {
+    public User updateUser(@Valid @RequestBody User user) {
+        if (user.getName() == null || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
+            log.debug("Пользователь создан. В качестве имени использован login: {}", user);
+        }
         if (userList.containsKey(user.getId())) {
             userList.put(user.getId(), user);
             log.debug("Пользователь обновлен: {}", user);
