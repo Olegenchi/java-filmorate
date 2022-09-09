@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -56,7 +57,7 @@ public class FilmController {
             return film;
         } else {
             log.warn("Ошибка при обновлении фильма: {}", film);
-            throw new ValidationException("Ошибка обновления фильма.");
+            throw new FilmValidationException("Ошибка обновления фильма.");
         }
     }
 
