@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,14 +10,11 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -296,5 +291,31 @@ class FilmControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON))
 
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void givenFindFilm_whenFind_thenStatus200AndFindFilm() throws Exception {
+        Film film = Film.builder()
+                .name("Saw")
+                .description("Saw description.")
+                .releaseDate(LocalDate.of(2003, 2, 13))
+                .duration(100)
+                .build();
+        mockMvc.perform(
+                post("/films")
+                        .content(objectMapper.writeValueAsString(film))
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(
+                        get("/films"))
+
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].name").value("Saw"))
+                .andExpect(jsonPath("$[0].description").value("Saw description."))
+                .andExpect(jsonPath("$[0].releaseDate")
+                        .value(LocalDate.of(2003, 2, 13).toString()))
+                .andExpect(jsonPath("$[0].duration").value(100));
     }
 }

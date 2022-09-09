@@ -346,4 +346,30 @@ class UserControllerTest {
 
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void givenFindUser_whenFind_thenStatus200AndFindUser() throws Exception {
+        User user = User.builder()
+                .name("Oleg")
+                .email("terentjev.dr@yandex.ru")
+                .login("OlegT")
+                .birthday(LocalDate.of(1993, 12, 3))
+                .build();
+        mockMvc.perform(
+                post("/users")
+                        .content(objectMapper.writeValueAsString(user))
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(
+                        get("/users"))
+
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].email").value("terentjev.dr@yandex.ru"))
+                .andExpect(jsonPath("$[0].login").value("OlegT"))
+                .andExpect(jsonPath("$[0].name").value("Oleg"))
+                .andExpect(jsonPath("$[0].birthday")
+                        .value(LocalDate.of(1993, 12, 3).toString()));
+    }
 }
