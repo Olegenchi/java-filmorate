@@ -21,7 +21,7 @@ public class UserValidator {
     public boolean userValidationById(@PathVariable Integer userId) {
         if (!userStorage.getAllUsers().containsKey(userId)) {
             log.warn("Ошибка при добавлении пользователя с id: {}.", userId);
-            throw new UserValidationException("Пользователя с таким ID не существует.");
+            throw new UserValidationException("Пользователь с таким id не существует.");
         }
         return true;
     }

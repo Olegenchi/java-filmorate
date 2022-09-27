@@ -35,7 +35,7 @@ public class FilmValidator {
     public boolean filmValidationById(@PathVariable Integer filmId) {
         if (!filmStorage.getAllFilms().containsKey(filmId)) {
             log.warn("Ошибка при добавлении фильма с id: {}.", filmId);
-            throw new FilmValidationException("Фильма с таким ID не существует.");
+            throw new FilmValidationException("Фильм с таким id не существует.");
         }
         return true;
     }
