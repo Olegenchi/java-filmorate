@@ -23,10 +23,6 @@ public class UserValidator {
             log.warn("Ошибка при добавлении пользователя с id: {}.", userId);
             throw new UserValidationException("Пользователь с таким id не существует.");
         }
-        if (!userService.findAllUsers().contains(userService.getUserById(userId))) {
-            log.warn("Ошибка при добавлении пользователя с id: {}.", userId);
-            throw new UserValidationException("Пользователь с таким id не существует.");
-        }
         return true;
     }
 

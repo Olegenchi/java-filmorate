@@ -37,10 +37,6 @@ public class FilmValidator {
             log.warn("Ошибка при добавлении фильма с id: {}.", filmId);
             throw new FilmValidationException("Фильм с таким id не существует.");
         }
-        if (!filmService.findAllFilms().contains(filmService.getFilmById(filmId))) {
-            log.warn("Ошибка при добавлении фильма с id: {}.", filmId);
-            throw new FilmValidationException("Фильм с таким id не существует.");
-        }
         return true;
     }
 
