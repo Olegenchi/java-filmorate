@@ -1,47 +1,40 @@
 package ru.yandex.practicum.filmorate.controller.user;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/users")
-@Data
 public class UserController {
 
-    private final InMemoryUserStorage userStorage;
     private final UserService userService;
     private final UserValidator userValidator;
 
     @Autowired
-    public UserController(InMemoryUserStorage userStorage, UserService userService, UserValidator userValidator) {
-        this.userStorage = userStorage;
+    public UserController(UserService userService, UserValidator userValidator) {
         this.userService = userService;
         this.userValidator = userValidator;
     }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        return userStorage.createUser(user);
+        return userService.createUser(user);
     }
 
     @GetMapping
     public List<User> findAllUsers() {
-        return userStorage.findAllUsers();
+        return userService.findAllUsers();
     }
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable Integer id) {
         userValidator.userValidationById(id);
-        return userService.getUser(id);
+        return userService.getUserById(id);
     }
 
     @GetMapping("/{id}/friends")
@@ -60,7 +53,7 @@ public class UserController {
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
         userValidator.userValidationById(user.getId());
-        return userStorage.updateUser(user);
+        return userService.updateUser(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")

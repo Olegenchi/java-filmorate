@@ -9,7 +9,7 @@ import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.LikeDoesNotExistException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 
@@ -17,11 +17,11 @@ import java.time.LocalDate;
 @Component
 public class FilmValidator {
     private static final LocalDate MIN_DATE = LocalDate.of(1895, 12, 28);
-    private final InMemoryFilmStorage filmStorage;
+    private final FilmService filmService;
 
     @Autowired
-    public FilmValidator(InMemoryFilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
+    public FilmValidator(FilmService filmService) {
+        this.filmService = filmService;
     }
 
     public boolean filmValidationByReleaseDate(Film film){
@@ -33,7 +33,11 @@ public class FilmValidator {
     }
 
     public boolean filmValidationById(@PathVariable Integer filmId) {
-        if (!filmStorage.getAllFilms().containsKey(filmId)) {
+        if (filmService.getFilmById(filmId) == null) {
+            log.warn("Ошибка при добавлении фильма с id: {}.", filmId);
+            throw new FilmValidationException("Фильм с таким id не существует.");
+        }
+        if (!filmService.findAllFilms().contains(filmService.getFilmById(filmId))) {
             log.warn("Ошибка при добавлении фильма с id: {}.", filmId);
             throw new FilmValidationException("Фильм с таким id не существует.");
         }
@@ -49,7 +53,7 @@ public class FilmValidator {
     }
 
     public boolean dislikeValidation(@PathVariable Integer filmId, @PathVariable Integer userId) {
-        if (!filmStorage.getAllFilms().get(filmId).getLikes().contains(userId)) {
+        if (!filmService.getFilmById(filmId).getLikes().contains(userId)) {
             log.warn("Пользователь с id: {} хочет удалить лайк, который он не ставил, у фильма с id: {}.",
                     userId, filmId);
             throw new LikeDoesNotExistException("Пользователь с id: " + userId +

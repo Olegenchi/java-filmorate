@@ -6,20 +6,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.exception.UserDoesNotExistException;
 import ru.yandex.practicum.filmorate.exception.UserValidationException;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 @Slf4j
 @Component
 public class UserValidator {
-    private final InMemoryUserStorage userStorage;
+    private final UserService userService;
 
     @Autowired
-    public UserValidator(InMemoryUserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserValidator(UserService userService) {
+        this.userService = userService;
     }
 
     public boolean userValidationById(@PathVariable Integer userId) {
-        if (!userStorage.getAllUsers().containsKey(userId)) {
+        if (userService.getUserById(userId) == null) {
+            log.warn("Ошибка при добавлении пользователя с id: {}.", userId);
+            throw new UserValidationException("Пользователь с таким id не существует.");
+        }
+        if (!userService.findAllUsers().contains(userService.getUserById(userId))) {
             log.warn("Ошибка при добавлении пользователя с id: {}.", userId);
             throw new UserValidationException("Пользователь с таким id не существует.");
         }

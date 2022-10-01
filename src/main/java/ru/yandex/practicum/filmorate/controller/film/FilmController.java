@@ -1,35 +1,25 @@
 package ru.yandex.practicum.filmorate.controller.film;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.controller.user.UserValidator;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/films")
-@Data
 public class FilmController {
 
-    private final InMemoryFilmStorage filmStorage;
-    private final FilmValidator filmValidator;
     private final FilmService filmService;
-    private final InMemoryUserStorage userStorage;
+    private final FilmValidator filmValidator;
     private final UserValidator userValidator;
 
     @Autowired
-    public FilmController(InMemoryFilmStorage filmStorage, FilmService filmService, InMemoryUserStorage userStorage, FilmValidator filmValidator, UserValidator userValidator) {
-        this.filmStorage = filmStorage;
+    public FilmController(FilmService filmService, FilmValidator filmValidator, UserValidator userValidator) {
         this.filmService = filmService;
-        this.userStorage = userStorage;
         this.filmValidator = filmValidator;
         this.userValidator = userValidator;
     }
@@ -37,18 +27,18 @@ public class FilmController {
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
         filmValidator.filmValidationByReleaseDate(film);
-        return filmStorage.createFilm(film);
+        return filmService.createFilm(film);
     }
 
     @GetMapping
     public List<Film> findAllFilms() {
-        return filmStorage.findAllFilms();
+        return filmService.findAllFilms();
     }
 
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable Integer id) {
         filmValidator.filmValidationById(id);
-        return filmService.getFilm(id);
+        return filmService.getFilmById(id);
     }
 
     @GetMapping("/popular")
@@ -61,7 +51,7 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film film) {
         filmValidator.filmValidationByReleaseDate(film);
         filmValidator.filmValidationById(film.getId());
-        return filmStorage.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
