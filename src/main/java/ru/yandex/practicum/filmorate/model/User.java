@@ -1,17 +1,18 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+@AllArgsConstructor
 @Data
 @Builder
 public class User {
@@ -27,4 +28,13 @@ public class User {
     @Past
     private LocalDate birthday;
     private final Set<Integer> friends = new HashSet<>();
+
+    public Map<String,Object> userToMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("user_email", email);
+        values.put("user_name", name);
+        values.put("user_login", login);
+        values.put("user_birthday", birthday);
+        return values;
+    }
 }

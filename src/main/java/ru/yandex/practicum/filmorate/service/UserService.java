@@ -3,73 +3,55 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.UserDoesNotExistException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class UserService {
-    private final UserStorage userStorage;
+    private final UserDbStorage userDbStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(UserDbStorage userDbStorage) {
+        this.userDbStorage = userDbStorage;
     }
 
     public List<User> findAllUsers() {
-        return userStorage.findAllUsers();
+        log.debug("UserService: список пользователей получен.");
+        return userDbStorage.findAll();
     }
 
     public User createUser(User user) {
-        return userStorage.createUser(user);
+        log.debug("UserService: пользователь c id: {} добавлен.", user.getId());
+        return userDbStorage.create(user);
     }
 
     public User updateUser(User user) {
-        return userStorage.updateUser(user);
+        log.debug("UserService: пользователь c id: {} обновлен.", user.getId());
+        validateDataExists(user.getId());
+        return userDbStorage.update(user);
     }
 
     public User getUserById(Integer userId) {
-        log.debug("Пользователь c id: {} получен.", userId);
-        return userStorage.getUserById(userId);
+        log.debug("UserService: пользователь c id: {} получен.", userId);
+        validateDataExists(userId);
+        return userDbStorage.get(userId);
     }
 
-    public List<User> addFriend(Integer userId, Integer friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
-        log.debug("Пользователь c id: {} подружился с другим пользователем с id: {}.", userId, friendId);
-        return List.of(user, friend);
+    public User delete(Integer userId) {
+        log.debug("UserService: пользователь c id: {} удален.", userId);
+        validateDataExists(userId);
+        return userDbStorage.delete(userId);
     }
 
-    public List<User> deleteFriend(Integer userId, Integer friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
-        log.debug("Пользователь c id: {} удалил из друзей пользователя с id: {}.", userId, friendId);
-        return List.of(user, friend);
-    }
-
-    public List<User> getCommonFriends(Integer userId, Integer otherUserId) {
-        Set<Integer> commonFriends = new HashSet<>(getUserById(userId).getFriends());
-        commonFriends.retainAll(getUserById(otherUserId).getFriends());
-        log.debug("Общие друзья у пользователя с id: {} с пользователем с id: {}.", userId, otherUserId);
-        return userStorage.findAllUsers().stream()
-                .filter(user -> commonFriends.contains(user.getId()))
-                .collect(Collectors.toList());
-    }
-
-    public List<User> getAllUserFriends(Integer userId) {
-        Set<Integer> friends = getUserById(userId).getFriends();
-        log.debug("Количество друзей у пользователя с id: {} равно {}.", userId, friends.size());
-        return userStorage.findAllUsers().stream()
-                .filter(user -> friends.contains(user.getId()))
-                .collect(Collectors.toList());
+    public void validateDataExists(Integer userId) {
+        log.debug("UserService: запрос на проверку наличия пользователя с id: {} в БД.", userId);
+        if (!userDbStorage.validateDataExists(userId)) {
+            String message = "Пользователя c таким id не существует.";
+            throw new UserDoesNotExistException(message);
+        }
     }
 }

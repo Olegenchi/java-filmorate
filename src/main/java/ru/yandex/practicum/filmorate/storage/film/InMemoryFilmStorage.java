@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@Component
+//@Component
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> allFilms = new HashMap<>();
     private int id = 0;
@@ -19,26 +19,35 @@ public class InMemoryFilmStorage implements FilmStorage {
         return ++id;
     }
 
-    public List<Film> findAllFilms() {
-        log.debug("Текущее количество фильмов: {}", allFilms.size());
+    public List<Film> findAll() {
+        log.debug("InMemoryFilmStorage: текущее количество фильмов: {}", allFilms.size());
         return new ArrayList<>(allFilms.values());
     }
 
-    public Film getFilmById(Integer filmId) {
-        log.debug("Фильм c id: {} получен.", filmId);
+    public Film get(Integer filmId) {
+        log.debug("InMemoryFilmStorage: фильм c id: {} получен.", filmId);
         return allFilms.get(filmId);
     }
 
-    public Film createFilm(Film film) {
+    public Film create(Film film) {
             film.setId(generateNextId());
             allFilms.put(film.getId(), film);
-            log.debug("Фильм добавлен: {}", film);
+            log.debug("InMemoryFilmStorage: фильм добавлен: {}", film);
             return film;
     }
 
-    public Film updateFilm(Film film) {
+    public Film update(Film film) {
             allFilms.put(film.getId(), film);
-            log.debug("Фильм обновлен: {}", film);
+            log.debug("InMemoryFilmStorage: фильм обновлен: {}", film);
             return film;
+    }
+
+    public Film delete(Integer filmId) {
+        log.debug("InMemoryFilmStorage: фильм с id: {} удален.", filmId);
+        return allFilms.remove(filmId);
+    }
+
+    public boolean validateDataExists(Integer id) {
+        return allFilms.containsKey(id);
     }
 }
