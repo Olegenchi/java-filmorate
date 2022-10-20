@@ -31,23 +31,23 @@ public class UserService {
 
     public User updateUser(User user) {
         log.debug("UserService: пользователь c id: {} обновлен.", user.getId());
-        validateDataExists(user.getId());
+        validateUserExists(user.getId());
         return userDbStorage.update(user);
     }
 
     public User getUserById(Integer userId) {
         log.debug("UserService: пользователь c id: {} получен.", userId);
-        validateDataExists(userId);
+        validateUserExists(userId);
         return userDbStorage.get(userId);
     }
 
     public User delete(Integer userId) {
         log.debug("UserService: пользователь c id: {} удален.", userId);
-        validateDataExists(userId);
+        validateUserExists(userId);
         return userDbStorage.delete(userId);
     }
 
-    public void validateDataExists(Integer userId) {
+    public void validateUserExists(Integer userId) {
         log.debug("UserService: запрос на проверку наличия пользователя с id: {} в БД.", userId);
         if (!userDbStorage.validateDataExists(userId)) {
             String message = "Пользователя c таким id не существует.";

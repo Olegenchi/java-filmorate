@@ -8,19 +8,20 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.RowMapper;
+import ru.yandex.practicum.filmorate.storage.StorageDbCommon;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Repository("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final StorageDbCommon storageDbCommon;
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, StorageDbCommon storageDbCommon) {
         this.jdbcTemplate = jdbcTemplate;
+        this.storageDbCommon = storageDbCommon;
     }
 
     @Override
@@ -30,7 +31,7 @@ public class FilmDbStorage implements FilmStorage {
                 "FROM FILMS as f " +
                 "LEFT JOIN MPA AS m ON f.mpa_id = m.mpa_id ";
         List<Film> result = jdbcTemplate.query(sql, RowMapper::mapRowToFilm);
-        return setMpaLikesGenre(result);
+        return storageDbCommon.setMpaLikesGenre(result);
     }
 
     @Override
@@ -43,8 +44,8 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE film_id = ?";
         Film result = jdbcTemplate.queryForObject(sql, RowMapper::mapRowToFilm, filmId);
         assert result != null;
-        setLike(result);
-        setGenre(result);
+        storageDbCommon.setLike(result);
+        storageDbCommon.setGenre(result);
         return result;
     }
 
@@ -94,16 +95,6 @@ public class FilmDbStorage implements FilmStorage {
         return deletedFilm;
     }
 
-    private void setMpaName(Film film) {
-        log.debug("FilmDbStorage: установлено значение поля name у рейтинга фильма с id: {}.",
-                film.getId());
-        String sql = "SELECT mpa_rating " +
-                "FROM MPA " +
-                "WHERE mpa_id = ?";
-        String rating = jdbcTemplate.queryForObject(sql, RowMapper::mapRowToRating, film.getMpa().getId());
-        film.getMpa().setName(rating);
-    }
-
     private void deleteFilmGenre(Integer filmId) {
         log.debug("FilmDbStorage: запрос на удаление фильма с id: {} в хранилище жанров.", filmId);
         String sqlDeleteGenre = "DELETE FROM FILM_GENRES WHERE film_id = ?";
@@ -119,35 +110,6 @@ public class FilmDbStorage implements FilmStorage {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(sqlAddGenre, filmId, genre.getId());
         }
-    }
-
-    public void setLike(Film film) {
-        log.debug("FilmDbStorage: установлено значение поля likes у фильма с id: {}.", film.getId());
-        String sql = "SELECT user_id " +
-                "FROM LIKES " +
-                "WHERE film_id = ?";
-        Set<Integer> likes = new HashSet<>(jdbcTemplate.query(sql, RowMapper::mapRowToLike, film.getId()));
-        film.getLikes().addAll(likes);
-    }
-
-    public void setGenre(Film film) {
-        log.debug("FilmDbStorage: установлено значение поля name у жанров фильма с id: {}.", film.getId());
-        String sql = "SELECT fg.genre_id, g.genre " +
-                "FROM FILM_GENRES AS fg " +
-                "LEFT JOIN GENRES AS g ON fg.genre_id = g.genre_id " +
-                "WHERE film_id = ?";
-        Set<Genre> genre = new HashSet<>(jdbcTemplate.query(sql, RowMapper::mapRowToGenre, film.getId()));
-        film.getGenres().addAll(genre);
-    }
-
-    public List<Film> setMpaLikesGenre(List<Film> films) {
-        films.forEach(this::setMpaName);
-        log.debug("FilmDbStorage: установлены значения поля name у рейтингов полученных фильмов.");
-        films.forEach(this::setLike);
-        log.debug("FilmDbStorage: установлены значения поля likes у полученных фильмов.");
-        films.forEach(this::setGenre);
-        log.debug("FilmDbStorage: установлены значения поля name у жанров полученных фильмов.");
-        return films;
     }
 
     @Override

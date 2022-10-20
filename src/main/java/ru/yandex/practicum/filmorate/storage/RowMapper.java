@@ -56,7 +56,7 @@ public class RowMapper {
         return rs.getInt("film_id");
     }
 
-    public static String mapRowToRating(ResultSet rs, Integer rowNum) throws SQLException {
+    public static String mapRowToMpaRating(ResultSet rs, Integer rowNum) throws SQLException {
         log.debug("RowMapper: получен запрос от БД на преобразование в количество лайков.");
         return rs.getString("mpa_rating");
     }

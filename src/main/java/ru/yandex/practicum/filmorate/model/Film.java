@@ -26,7 +26,7 @@ public class Film {
     @NotNull
     @Positive
     private long duration;
-    private Integer rate = 0;
+    private Integer rate;
     @NotNull
     private Mpa mpa;
     private final Set<Genre> genres = new TreeSet<>(Comparator.comparingInt(Genre::getId));

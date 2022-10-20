@@ -24,15 +24,15 @@ public class LikeService {
 
     public Film likeFilm(Integer filmId, Integer userId) {
         log.debug("LikesService: пользователь с id: {} поставил лайк фильму с id: {}.", userId, filmId);
-        filmService.validateDataExists(filmId);
-        userService.validateDataExists(userId);
+        filmService.validateFilmExists(filmId);
+        userService.validateUserExists(userId);
         return likeDbStorage.likeFilm(filmId, userId);
     }
 
     public Film dislikeFilm(Integer filmId, Integer userId) {
         log.debug("LikesService: пользователь с id: {} удалил лайк фильму с id: {}.", userId, filmId);
-        filmService.validateDataExists(filmId);
-        userService.validateDataExists(userId);
+        filmService.validateFilmExists(filmId);
+        userService.validateUserExists(userId);
         return likeDbStorage.dislikeFilm(filmId, userId);
     }
 

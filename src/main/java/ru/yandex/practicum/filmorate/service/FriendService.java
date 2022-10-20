@@ -26,33 +26,33 @@ public class FriendService {
     public List<User> addFriend(Integer userId, Integer friendId) {
         log.debug("FriendsService: запрос от пользователя c id: {} на добавление в друзья пользователя с id: {}.",
                 userId, friendId);
-        validateDataExists(userId);
-        validateDataExists(friendId);
+        validateFriendExists(userId);
+        validateFriendExists(friendId);
         return friendDbStorage.addFriend(userId, friendId);
     }
 
     public List<User> findAll(Integer userId) {
         log.debug("FriendsService: запрос на получение всех друзей пользователя c id: {}.", userId);
-        validateDataExists(userId);
+        validateFriendExists(userId);
         return friendDbStorage.getAllFriends(userId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer otherId) {
         log.debug("FriendsService: запрос на получение общих друзей пользователей c id: {} и id: {}.", userId, otherId);
-        validateDataExists(userId);
-        validateDataExists(otherId);
+        validateFriendExists(userId);
+        validateFriendExists(otherId);
         return friendDbStorage.getCommonFriends(userId, otherId);
     }
 
     public List<User> deleteFriend(Integer userId, Integer friendId) {
         log.debug("FriendsService: запрос от пользователя c id: {} на удаление из друзей пользователя с id: {}.",
                 userId, friendId);
-        validateDataExists(userId);
-        validateDataExists(friendId);
+        validateFriendExists(userId);
+        validateFriendExists(friendId);
         return friendDbStorage.deleteFriend(userId, friendId);
     }
 
-    public void validateDataExists(Integer userId) {
+    public void validateFriendExists(Integer userId) {
         log.debug("FriendsService: проверка наличия пользователя с id: {} в БД.", userId);
         if (!userStorage.validateDataExists(userId)) {
             String message = "Пользователя c таким id не существует.";

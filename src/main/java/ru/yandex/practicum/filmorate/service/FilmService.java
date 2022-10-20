@@ -29,23 +29,23 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         log.debug("FilmService: фильм c id: {} обновлен.", film.getId());
-        validateDataExists(film.getId());
+        validateFilmExists(film.getId());
         return filmDbStorage.update(film);
     }
 
     public Film getFilmById(Integer filmId) {
         log.debug("FilmService: фильм c id: {} получен.", filmId);
-        validateDataExists(filmId);
+        validateFilmExists(filmId);
         return filmDbStorage.get(filmId);
     }
 
     public Film delete(Integer filmId) {
         log.debug("FilmService: запрос на удаление фильма с id: {}.", filmId);
-        validateDataExists(filmId);
+        validateFilmExists(filmId);
         return filmDbStorage.delete(filmId);
     }
 
-    public void validateDataExists(Integer filmId) {
+    public void validateFilmExists(Integer filmId) {
         log.debug("FilmService: запрос на проверку наличия фильма с id: {} в БД.", filmId);
         if (!filmDbStorage.validateDataExists(filmId)) {
             String message = "Фильм c таким id не существует.";

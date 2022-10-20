@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controller.film;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.controller.user.UserValidator;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.LikeService;
 
@@ -13,13 +12,11 @@ import java.util.List;
 public class LikeController {
     private final LikeService likeService;
     private final FilmValidator filmValidator;
-    private final UserValidator userValidator;
 
     @Autowired
-    public LikeController(LikeService likeService, FilmValidator filmValidator, UserValidator userValidator) {
+    public LikeController(LikeService likeService, FilmValidator filmValidator) {
         this.likeService = likeService;
         this.filmValidator = filmValidator;
-        this.userValidator = userValidator;
     }
 
     @GetMapping("/popular")

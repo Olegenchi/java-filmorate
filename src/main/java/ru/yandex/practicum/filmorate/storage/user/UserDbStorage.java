@@ -7,22 +7,23 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.RowMapper;
+import ru.yandex.practicum.filmorate.storage.StorageDbCommon;
 import ru.yandex.practicum.filmorate.storage.film.LikeDbStorage;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Repository("UserDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final LikeDbStorage likeDbStorage;
+    private final StorageDbCommon storageDbCommon;
 
     @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate, LikeDbStorage likeDbStorage) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate, LikeDbStorage likeDbStorage, StorageDbCommon storageDbCommon) {
         this.jdbcTemplate = jdbcTemplate;
         this.likeDbStorage = likeDbStorage;
+        this.storageDbCommon = storageDbCommon;
     }
 
     @Override
@@ -31,7 +32,7 @@ public class UserDbStorage implements UserStorage {
         String sql = "SELECT * " +
                 "FROM USERS";
         List<User> result = jdbcTemplate.query(sql, RowMapper::mapRowToUser);
-        result.forEach(this::setFriend);
+        result.forEach(storageDbCommon::setFriend);
         return result;
     }
 
@@ -42,7 +43,7 @@ public class UserDbStorage implements UserStorage {
                 "FROM USERS " +
                 "WHERE user_id = ?";
         User result = jdbcTemplate.queryForObject(sql, RowMapper::mapRowToUser, userId);
-        setFriend(result);
+        storageDbCommon.setFriend(result);
         return result;
     }
 
@@ -61,9 +62,9 @@ public class UserDbStorage implements UserStorage {
     public User update(User user) {
         int userId = user.getId();
         log.debug("UserDbStorage: запрос к БД на обновление пользователя с id: {}.", userId);
-        String sql = "UPDATE USERS SET " +
-                "user_email = ?, user_name = ?, user_login = ?, user_birthday = ? "
-                + "WHERE user_id = ?";
+        String sql = "UPDATE USERS " +
+                "SET user_email = ?, user_name = ?, user_login = ?, user_birthday = ? " +
+                "WHERE user_id = ?";
         jdbcTemplate.update(sql,
                 user.getEmail(),
                 user.getName(),
@@ -101,15 +102,5 @@ public class UserDbStorage implements UserStorage {
                 "WHERE user_id = ?";
         int count = jdbcTemplate.queryForObject(sql, RowMapper::mapRowToCount, userId);
         return count != 0;
-    }
-//duplicate
-    public void setFriend(User user) {
-        Integer userId = user.getId();
-        log.debug("UserDbStorage: запрос на обновление друзей пользователя c id: {}.", userId);
-        String sql = "SELECT friend_id " +
-                "FROM FRIENDS " +
-                "WHERE user_id = ?";
-        Set<Integer> friends = new HashSet<>(jdbcTemplate.query(sql, RowMapper::mapRowToFriendId, userId));
-        user.getFriends().addAll(friends);
     }
 }

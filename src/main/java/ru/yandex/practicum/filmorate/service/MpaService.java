@@ -26,11 +26,11 @@ public class MpaService {
 
     public Mpa get(Integer mpaId) {
         log.debug("MpaService: запрос на получение рейтинга с id: {}.", mpaId);
-        validateDataExists(mpaId);
+        validateMpaExists(mpaId);
         return mpaDbStorage.get(mpaId);
     }
 
-    public void validateDataExists(Integer mpaId) {
+    public void validateMpaExists(Integer mpaId) {
         log.debug("MpaService: запрос на проверку наличия рейтинга с id: {} в БД.", mpaId);
         if (!mpaDbStorage.validateDataExists(mpaId)) {
             String message = "Рейтинга c таким id не существует.";

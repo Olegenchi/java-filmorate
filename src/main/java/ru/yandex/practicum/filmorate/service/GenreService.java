@@ -26,11 +26,11 @@ public class GenreService {
 
     public Genre get(Integer genreId) {
         log.debug("GenreService: запрос на получение жанра с id: {}.", genreId);
-        validateDataExists(genreId);
+        validateGenreExists(genreId);
         return genreDbStorage.get(genreId);
     }
 
-    public void validateDataExists(Integer genreId) {
+    public void validateGenreExists(Integer genreId) {
         log.debug("GenreService: запрос на проверку наличия жанра с id: {} в базе данных жанров.", genreId);
         if (!genreDbStorage.validateDataExists(genreId)) {
             String message = "Жанра c таким id не существует.";

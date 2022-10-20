@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.yandex.practicum.filmorate.exception.FilmValidationException;
 import ru.yandex.practicum.filmorate.exception.LikeDoesNotExistException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -28,14 +27,6 @@ public class FilmValidator {
         if (film.getReleaseDate().isBefore(MIN_DATE)) {
             log.warn("FilmValidator: ошибка при добавлении фильма: {}.", film);
             throw new ValidationException("Дата релиза не может быть раньше 28.12.1895 г.");
-        }
-        return true;
-    }
-
-    public boolean filmValidationById(@PathVariable Integer filmId) {
-        if (filmService.getFilmById(filmId) == null) {
-            log.warn("FilmValidator: ошибка при добавлении фильма с id: {}.", filmId);
-            throw new FilmValidationException("Фильм с таким id не существует.");
         }
         return true;
     }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.RowMapper;
 import ru.yandex.practicum.filmorate.storage.Storage;
+import ru.yandex.practicum.filmorate.storage.StorageDbCommon;
 
 import java.util.List;
 
@@ -16,14 +17,14 @@ import java.util.List;
 public class LikeDbStorage {
     private final JdbcTemplate jdbcTemplate;
     private final Storage<Film> filmStorage;
-    private final FilmDbStorage filmDbStorage;
+    private final StorageDbCommon storageDbCommon;
 
     @Autowired
     public LikeDbStorage(JdbcTemplate jdbcTemplate, @Qualifier("FilmDbStorage") Storage<Film> filmStorage,
-                         FilmDbStorage filmDbStorage) {
+                         StorageDbCommon storageDbCommon) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmStorage = filmStorage;
-        this.filmDbStorage = filmDbStorage;
+        this.storageDbCommon = storageDbCommon;
     }
 
     public Film likeFilm(Integer filmId, Integer userId) {
@@ -53,7 +54,7 @@ public class LikeDbStorage {
         List<Film> result = jdbcTemplate.query(sql, RowMapper::mapRowToFilm, count);
         log.debug("LikesDbStorage: список самых популярных фильмов длиной {} при запросе списка длиной {}.",
                 result.size(), count);
-        return filmDbStorage.setMpaLikesGenre(result);
+        return storageDbCommon.setMpaLikesGenre(result);
     }
 
     private void updateRate(Integer filmId, boolean isIncrease) {

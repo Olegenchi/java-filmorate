@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS FILMS
     film_description varchar(200) NOT NULL,
     film_release_date date NOT NULL,
     film_duration int NOT NULL,
-    film_rate int NOT NULL,
+    film_rate int,
     mpa_id int NOT NULL,
     FOREIGN KEY (mpa_id) REFERENCES MPA (mpa_id)
 );
