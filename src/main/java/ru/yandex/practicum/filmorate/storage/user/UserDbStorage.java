@@ -6,24 +6,25 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.RowMapper;
-import ru.yandex.practicum.filmorate.storage.StorageDbCommon;
 import ru.yandex.practicum.filmorate.storage.film.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.userImpl.UserStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Repository("UserDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final LikeDbStorage likeDbStorage;
-    private final StorageDbCommon storageDbCommon;
 
     @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate, LikeDbStorage likeDbStorage, StorageDbCommon storageDbCommon) {
+    public UserDbStorage(JdbcTemplate jdbcTemplate, LikeDbStorage likeDbStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.likeDbStorage = likeDbStorage;
-        this.storageDbCommon = storageDbCommon;
     }
 
     @Override
@@ -31,8 +32,8 @@ public class UserDbStorage implements UserStorage {
         log.debug("UserDbStorage: запрос на получение всех пользователей из БД.");
         String sql = "SELECT * " +
                 "FROM USERS";
-        List<User> result = jdbcTemplate.query(sql, RowMapper::mapRowToUser);
-        result.forEach(storageDbCommon::setFriend);
+        List<User> result = jdbcTemplate.query(sql, this::mapRowToUser);
+        result.forEach(this::setFriend);
         return result;
     }
 
@@ -42,8 +43,8 @@ public class UserDbStorage implements UserStorage {
         String sql = "SELECT user_id, user_email, user_name, user_login, user_birthday " +
                 "FROM USERS " +
                 "WHERE user_id = ?";
-        User result = jdbcTemplate.queryForObject(sql, RowMapper::mapRowToUser, userId);
-        storageDbCommon.setFriend(result);
+        User result = jdbcTemplate.queryForObject(sql, this::mapRowToUser, userId);
+        this.setFriend(result);
         return result;
     }
 
@@ -81,7 +82,7 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sqlDeleteFriendship, userId);
 
         String sqlGetLikedFilms = "SELECT film_id FROM LIKES WHERE user_id = ?";
-        List<Integer> likedFilms = jdbcTemplate.query(sqlGetLikedFilms, RowMapper::mapRowToLikeId, userId);
+        List<Integer> likedFilms = jdbcTemplate.query(sqlGetLikedFilms, this::mapRowToLikeId, userId);
         likedFilms.forEach(filmId -> likeDbStorage.dislikeFilm(filmId, userId));
         String sqlDeleteLike = "DELETE FROM LIKES WHERE user_id = ?";
         jdbcTemplate.update(sqlDeleteLike, userId);
@@ -100,7 +101,43 @@ public class UserDbStorage implements UserStorage {
         String sql = "SELECT COUNT(*) AS count " +
                 "FROM USERS " +
                 "WHERE user_id = ?";
-        int count = jdbcTemplate.queryForObject(sql, RowMapper::mapRowToCount, userId);
+        int count = jdbcTemplate.queryForObject(sql, this::mapRowToCount, userId);
         return count != 0;
+    }
+
+    public void setFriend(User user) {
+        Integer userId = user.getId();
+        log.debug("UserDbStorage: запрос на обновление друзей пользователя c id: {}.", userId);
+        String sql = "SELECT friend_id " +
+                "FROM FRIENDS " +
+                "WHERE user_id = ?";
+        Set<Integer> friends = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToFriendId, userId));
+        user.getFriends().addAll(friends);
+    }
+
+    public User mapRowToUser(ResultSet rs, Integer rowNum) throws SQLException {
+        log.debug("RowMapper: получен запрос от БД на преобразование в User.");
+        return User.builder()
+                .id(rs.getInt("user_id"))
+                .email(rs.getString("user_email"))
+                .login(rs.getString("user_login"))
+                .name(rs.getString("user_name"))
+                .birthday(rs.getDate("user_birthday").toLocalDate())
+                .build();
+    }
+
+    public Integer mapRowToCount(ResultSet rs, Integer rowNum) throws SQLException {
+        log.debug("RowMapper: получен запрос от БД на преобразование в количество записей");
+        return rs.getInt("count");
+    }
+
+    public Integer mapRowToLikeId(ResultSet rs, Integer rowNum) throws SQLException {
+        log.debug("RowMapper: получен запрос от БД на преобразование в id понравившегося фильма.");
+        return rs.getInt("film_id");
+    }
+
+    public Integer mapRowToFriendId(ResultSet rs, Integer rowNum) throws SQLException {
+        log.debug("RowMapper: получен запрос от БД на преобразование в id друга.");
+        return rs.getInt("friend_id");
     }
 }

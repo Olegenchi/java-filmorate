@@ -7,21 +7,23 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.RowMapper;
-import ru.yandex.practicum.filmorate.storage.StorageDbCommon;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.filmImpl.FilmStorage;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Repository("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final StorageDbCommon storageDbCommon;
 
     @Autowired
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, StorageDbCommon storageDbCommon) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.storageDbCommon = storageDbCommon;
     }
 
     @Override
@@ -30,8 +32,7 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT * " +
                 "FROM FILMS as f " +
                 "LEFT JOIN MPA AS m ON f.mpa_id = m.mpa_id ";
-        List<Film> result = jdbcTemplate.query(sql, RowMapper::mapRowToFilm);
-        return storageDbCommon.setMpaLikesGenre(result);
+        return jdbcTemplate.query(sql, this::mapRowToFilm);
     }
 
     @Override
@@ -42,10 +43,10 @@ public class FilmDbStorage implements FilmStorage {
                 "FROM FILMS AS f " +
                 "LEFT JOIN MPA AS m ON f.mpa_id = m.mpa_id " +
                 "WHERE film_id = ?";
-        Film result = jdbcTemplate.queryForObject(sql, RowMapper::mapRowToFilm, filmId);
+        Film result = jdbcTemplate.queryForObject(sql, this::mapRowToFilm, filmId);
         assert result != null;
-        storageDbCommon.setLike(result);
-        storageDbCommon.setGenre(result);
+        this.setLike(result);
+        this.setGenre(result);
         return result;
     }
 
@@ -118,7 +119,59 @@ public class FilmDbStorage implements FilmStorage {
         String sql = "SELECT COUNT(*) AS count " +
                 "FROM FILMS " +
                 "WHERE film_id = ?";
-        int count = jdbcTemplate.queryForObject(sql, RowMapper::mapRowToCount, filmId);
+        int count = jdbcTemplate.queryForObject(sql, this::mapRowToCount, filmId);
         return count != 0;
+    }
+
+    public void setLike(Film film) {
+        log.debug("FilmDbStorage: установлено значение поля likes у фильма с id: {}.", film.getId());
+        String sql = "SELECT user_id " +
+                "FROM LIKES " +
+                "WHERE film_id = ?";
+        Set<Integer> likes = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToLike, film.getId()));
+        film.getLikes().addAll(likes);
+    }
+
+    @Override
+    public void setGenre(Film film) {
+        log.debug("FilmDbStorage: установлено значение поля name у жанров фильма с id: {}.", film.getId());
+        String sql = "SELECT fg.genre_id, g.genre " +
+                "FROM FILM_GENRES AS fg " +
+                "LEFT JOIN GENRES AS g ON fg.genre_id = g.genre_id " +
+                "WHERE film_id = ?";
+        Set<Genre> genre = new HashSet<>(jdbcTemplate.query(sql, this::mapRowToGenre, film.getId()));
+        film.getGenres().addAll(genre);
+    }
+
+    public Film mapRowToFilm(ResultSet rs, Integer rowNum) throws SQLException {
+        log.debug("RowMapper: получен запрос от БД на преобразование в Film.");
+        return Film.builder()
+                .id(rs.getInt("film_id"))
+                .name(rs.getString("film_name"))
+                .description(rs.getString("film_description"))
+                .releaseDate(rs.getDate("film_release_date").toLocalDate())
+                .duration(rs.getLong("film_duration"))
+                .rate(rs.getInt("film_rate"))
+                .mpa(Mpa.builder().id(rs.getInt("mpa_id"))
+                        .name(rs.getString("mpa_rating")).build())
+                .build();
+    }
+
+    public Integer mapRowToCount(ResultSet rs, Integer rowNum) throws SQLException {
+        log.debug("RowMapper: получен запрос от БД на преобразование в количество записей");
+        return rs.getInt("count");
+    }
+
+    public Genre mapRowToGenre(ResultSet rs, Integer rowNum) throws SQLException {
+        log.debug("RowMapper: получен запрос от БД на преобразование в Жанр.");
+        return Genre.builder()
+                .id(rs.getInt("genre_id"))
+                .name(rs.getString("genre"))
+                .build();
+    }
+
+    public Integer mapRowToLike(ResultSet rs, Integer rowNum) throws SQLException {
+        log.debug("RowMapper: получен запрос от БД на преобразование в лайк.");
+        return rs.getInt("user_id");
     }
 }

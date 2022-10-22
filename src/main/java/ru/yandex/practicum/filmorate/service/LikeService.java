@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.film.LikeDbStorage;
+import ru.yandex.practicum.filmorate.storage.filmImpl.LikeStorage;
 
 import java.util.List;
 
@@ -13,31 +13,33 @@ import java.util.List;
 public class LikeService {
     private final UserService userService;
     private final FilmService filmService;
-    private final LikeDbStorage likeDbStorage;
+    private final LikeStorage likeStorage;
 
     @Autowired
-    public LikeService(UserService userService, FilmService filmService, LikeDbStorage likeDbStorage) {
+    public LikeService(UserService userService, FilmService filmService, LikeStorage likeStorage) {
         this.userService = userService;
         this.filmService = filmService;
-        this.likeDbStorage = likeDbStorage;
+        this.likeStorage = likeStorage;
     }
 
     public Film likeFilm(Integer filmId, Integer userId) {
         log.debug("LikesService: пользователь с id: {} поставил лайк фильму с id: {}.", userId, filmId);
         filmService.validateFilmExists(filmId);
         userService.validateUserExists(userId);
-        return likeDbStorage.likeFilm(filmId, userId);
+        return likeStorage.likeFilm(filmId, userId);
     }
 
     public Film dislikeFilm(Integer filmId, Integer userId) {
         log.debug("LikesService: пользователь с id: {} удалил лайк фильму с id: {}.", userId, filmId);
         filmService.validateFilmExists(filmId);
         userService.validateUserExists(userId);
-        return likeDbStorage.dislikeFilm(filmId, userId);
+        return likeStorage.dislikeFilm(filmId, userId);
     }
 
     public List<Film> getMostPopularFilms(Integer count) {
         log.debug("LikesService: запрос на получение списка самых популярных фильмов размером {}.", count);
-        return likeDbStorage.getMostPopularFilms(count);
+        List<Film> mostPopularFilms = likeStorage.getMostPopularFilms(count);
+        mostPopularFilms.forEach(likeStorage::setLike);
+        return mostPopularFilms;
     }
 }
