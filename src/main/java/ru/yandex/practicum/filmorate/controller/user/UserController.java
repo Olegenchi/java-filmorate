@@ -23,6 +23,7 @@ public class UserController {
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
+        userValidator.userValidationByName(user);
         return userService.createUser(user);
     }
 
@@ -33,41 +34,17 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable Integer id) {
-        userValidator.userValidationById(id);
         return userService.getUserById(id);
-    }
-
-    @GetMapping("/{id}/friends")
-    public List<User> getAllUserFriends(@PathVariable Integer id) {
-        userValidator.userValidationById(id);
-        return userService.getAllUserFriends(id);
-    }
-
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
-        userValidator.userValidationById(id);
-        userValidator.userValidationById(otherId);
-        return userService.getCommonFriends(id, otherId);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        userValidator.userValidationById(user.getId());
+        userValidator.userValidationByName(user);
         return userService.updateUser(user);
     }
 
-    @PutMapping("/{id}/friends/{friendId}")
-    public List<User> addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
-        userValidator.userValidationAddHimselfAsFriend(id, friendId);
-        userValidator.userValidationById(id);
-        userValidator.userValidationById(friendId);
-        return userService.addFriend(id, friendId);
-    }
-
-    @DeleteMapping("/{id}/friends/{friendId}")
-    public List<User> deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
-        userValidator.userValidationById(id);
-        userValidator.userValidationById(friendId);
-        return userService.deleteFriend(id, friendId);
+    @DeleteMapping("/{id}")
+    public User delete(@PathVariable Integer id) {
+        return userService.delete(id);
     }
 }

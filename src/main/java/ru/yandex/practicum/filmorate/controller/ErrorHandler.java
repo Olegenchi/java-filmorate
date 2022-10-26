@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.ErrorResponse;
 public class ErrorHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUserDoesNotExistException(final UserDoesNotExistException e) {
         return new ErrorResponse(
                 e.getMessage()
@@ -35,7 +35,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleLikeDoesNotExistException(final LikeDoesNotExistException e) {
         return new ErrorResponse(
                 e.getMessage()
@@ -56,5 +56,17 @@ public class ErrorHandler {
         return new ErrorResponse(
                 e.getMessage()
         );
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleGenreNotFound(final GenreDoesNotExistException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleMpaNotFound(final MpaDoesNotExistException e) {
+        return new ErrorResponse(e.getMessage());
     }
 }
