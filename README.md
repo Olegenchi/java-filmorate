@@ -9,6 +9,7 @@ This social network facilitates the selection of movies by leveraging ratings an
 ![Spring Boot](https://img.shields.io/badge/spring%20Boot-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
 ![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+![JUnit](https://img.shields.io/badge/junit-%25E67127.svg?style=for-the-badge&logo=junit5&logoColor=white)
 
 ___
 ### Data storage
