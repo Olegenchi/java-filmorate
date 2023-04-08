@@ -1,9 +1,16 @@
 # Filmorate
-Kinopoisk for Friends - a social network that helps choose movies based on friends' ratings and reviews. The user has the following capabilities: adding movies, rating movies, leaving movie reviews, adding other users as friends, receiving recommended movies based on friends' favorite movies. 
+
+### Functional
+This social network facilitates the selection of movies by leveraging ratings and reviews provided by friends. Users can add movies to their list, rate them, pen down reviews, connect with other users and receive recommendations based on their friends' favorite movies.
 
 ---
-### Stack: Spring Boot, Maven, Lombok, JDBC, PostgreSQL.
-
+### Stack
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/spring%20Boot-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
 ![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/postgresql-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
+
+___
+### Data storage
+
+![ER-диаграмма](src/main/resources/SchemaDb.png)
